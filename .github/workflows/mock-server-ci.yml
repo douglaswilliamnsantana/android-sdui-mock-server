@@ -18,7 +18,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: mock-server
+        working-directory: .
 
     steps:
       # ─── Checkout ───────────────────────────────────────
@@ -31,11 +31,15 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
-          cache-dependency-path: mock-server/package-lock.json
+          cache-dependency-path: package-lock.json
 
       # ─── Dependencies ───────────────────────────────────
       - name: Install dependencies
         run: npm ci
+
+      # ─── Lint ───────────────────────────────────────────
+      - name: Run ESLint
+        run: npm run lint
 
       # ─── Validate server startup ────────────────────────
       - name: Validate server starts correctly
