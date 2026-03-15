@@ -1,0 +1,57 @@
+name: Mock Server CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'mock-server/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'mock-server/**'
+  workflow_dispatch:
+
+jobs:
+  ci:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: mock-server
+
+    steps:
+      # ─── Checkout ───────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ─── Node.js ────────────────────────────────────────
+      - name: Setup Node.js v24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+          cache-dependency-path: mock-server/package-lock.json
+
+      # ─── Dependencies ───────────────────────────────────
+      - name: Install dependencies
+        run: npm ci
+
+      # ─── Validate server startup ────────────────────────
+      - name: Validate server starts correctly
+        run: |
+          node src/index.js &
+          SERVER_PID=$!
+          sleep 3
+
+          echo "🔍 Checking /screens..."
+          curl -sf http://localhost:3000/screens | grep -q "screens" && echo "✅ /screens OK" || (echo "❌ /screens FAILED" && exit 1)
+
+          echo "🔍 Checking /screens/home..."
+          curl -sf http://localhost:3000/screens/home | grep -q "type" && echo "✅ /screens/home OK" || (echo "❌ /screens/home FAILED" && exit 1)
+
+          echo "🔍 Checking /docs.json..."
+          curl -sf http://localhost:3000/docs.json | grep -q "openapi" && echo "✅ /docs.json OK" || (echo "❌ /docs.json FAILED" && exit 1)
+
+          kill $SERVER_PID
+          echo "✅ All checks passed!"
