@@ -18,9 +18,8 @@
 ## Setup
 
 ```bash
-# 1. Clone or download the project
-git clone https://github.com/douglaswilliamnsantana/android-sdui.git
-cd android-sdui/mock-server
+# 1. Enter the mock-server folder
+cd mock-server
 
 # 2. Install dependencies
 npm install
@@ -57,6 +56,7 @@ android-sdui-mock-server/
 │   └── screens/
 │       ├── index.js          → Aggregates all screen definitions
 │       └── home.js           → Home screen Node tree
+├── eslint.config.js          → ESLint v9 flat config
 ├── package.json
 └── .gitignore
 ```
@@ -64,7 +64,7 @@ android-sdui-mock-server/
 ### How it works / Como funciona
 
 ```
-nodemon starts
+npm run dev
       │
       ▼
 src/routes/screens.js
@@ -76,8 +76,9 @@ src/routes/screens.js
       └── GET /screens → returns the auto-generated list
 ```
 
-EN: No manual route registration needed. Adding a new `.js` file to `src/screens/` is enough.
-PT: Nenhum registro manual de rota necessário. Basta adicionar um novo arquivo `.js` em `src/screens/`.
+EN: No manual route registration needed. Adding a new `.js` file to `src/screens/` is enough — the endpoint is registered automatically on the next restart.
+
+PT: Nenhum registro manual de rota necessário. Basta adicionar um novo arquivo `.js` em `src/screens/` — o endpoint é registrado automaticamente na próxima inicialização.
 
 ---
 
@@ -106,7 +107,7 @@ touch src/screens/settings.js
 
 ### Step 2 — Define the Node tree / Defina a árvore de Nodes
 
-Open the file and export a Node object following this structure:
+Open the file and export a Node object:
 
 ```js
 /**
@@ -141,7 +142,7 @@ module.exports = settings;
 
 ### Done! / Pronto!
 
-After saving the file, nodemon will restart automatically and the new endpoint will be available:
+After saving and restarting, the new endpoint will be available automatically:
 
 ```
 📋 Screens auto-discovered (2):
@@ -153,8 +154,9 @@ After saving the file, nodemon will restart automatically and the new endpoint w
 
 ## Node Structure / Estrutura do Node
 
-EN: Each screen exports a `Node` object. The Node structure must match the `Node` model in the Android app.
-PT: Cada tela exporta um objeto `Node`. A estrutura do Node deve corresponder ao modelo `Node` do app Android.
+EN: Each screen exports a `Node` object. The Node structure must match the `Node` model in the Android app (`com.douglassantana.sdui_core.Node`).
+
+PT: Cada tela exporta um objeto `Node`. A estrutura do Node deve corresponder ao modelo `Node` do app Android (`com.douglassantana.sdui_core.Node`).
 
 ```js
 {
@@ -172,7 +174,7 @@ PT: Cada tela exporta um objeto `Node`. A estrutura do Node deve corresponder ao
     {
       type: "text",
       props: { text: "Hello" },
-    }
+    },
   ],
 }
 ```
@@ -185,6 +187,32 @@ PT: Cada tela exporta um objeto `Node`. A estrutura do Node deve corresponder ao
 |---|---|---|
 | `text` | `text: String` | Simple text label |
 | `column` | `paddingAll`, `paddingHorizontal`, `paddingVertical`, `paddingTop`, `paddingBottom`, `paddingStart`, `paddingEnd` | Vertical layout container |
+
+---
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start with nodemon (hot reload) |
+| `npm start` | Start without hot reload |
+| `npm run lint` | Run ESLint |
+| `npm run lint:fix` | Run ESLint and auto-fix issues |
+
+---
+
+## CI/CD
+
+The project uses GitHub Actions to validate the server on every push or pull request.
+
+**Workflow:** `.github/workflows/mock-server-ci.yml`
+
+| Step | What it does |
+|---|---|
+| Setup Node.js v24 | Installs the correct Node version |
+| `npm install` | Installs all dependencies |
+| ESLint | Validates code style and errors |
+| Server validation | Starts the server and checks `/screens`, `/screens/home` and `/docs.json` via `curl` |
 
 ---
 
