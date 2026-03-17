@@ -5,24 +5,21 @@
  * PT: Árvore de Nodes para a tela Home.
  */
 const home = {
-  type: "column",
-  props: {
-    paddingAll: 16,
-  },
-  children: [
-    {
-      type: "text",
-      props: {
-        text: "Welcome to Android SDUI",
+  "type": "text",
+  "props": {
+    "text": "Hello SDUI",
+    "style": {
+      "padding": {
+        "start": 24,
+        "end": 24,
+        "top": 32,
+        "bottom": 0
       },
-    },
-    {
-      type: "text",
-      props: {
-        text: "This screen is rendered from a remote JSON.",
-      },
-    },
-  ],
-};
+      "color": "#1A202C",
+      "fontSize": 22,
+      "fontWeight": "semi-bold"
+    }
+  }
+}
 
 module.exports = home;
