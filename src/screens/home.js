@@ -20,6 +20,6 @@ const home = {
       "fontWeight": "semi-bold"
     }
   }
-}
+};
 
 module.exports = home;
