@@ -18,16 +18,13 @@
 ## Setup
 
 ```bash
-# 1. Enter the mock-server folder
-cd mock-server
-
-# 2. Install dependencies
+# 1. Install dependencies
 npm install
 
-# 3. Run in development mode (hot reload)
+# 2. Run in development mode (hot reload)
 npm run dev
 
-# 4. Or run in production mode
+# 3. Or run in production mode
 npm start
 ```
 
@@ -35,11 +32,8 @@ After starting, the terminal will show:
 
 ```
 🚀 SDUI Mock Server running at http://localhost:3000
-📖 Swagger UI:   http://localhost:3000/docs
-📄 Swagger JSON: http://localhost:3000/docs.json
-
-📋 Screens auto-discovered (1):
-   → http://localhost:3000/screens/home
+📖 Swagger UI:         http://localhost:3000/docs
+📄 Swagger JSON:       http://localhost:3000/docs.json
 ```
 
 ---
@@ -52,9 +46,8 @@ android-sdui-mock-server/
 │   ├── index.js              → Express server entry point + Swagger setup
 │   ├── swagger.js            → OpenAPI 3.0 spec configuration
 │   ├── routes/
-│   │   └── screens.js        → Auto-discovery: registers one endpoint per screen file
+│   │   └── screens.js        → Registers screen endpoints
 │   └── screens/
-│       ├── index.js          → Aggregates all screen definitions
 │       └── home.js           → Home screen Node tree
 ├── eslint.config.js          → ESLint v9 flat config
 ├── package.json
@@ -69,16 +62,14 @@ npm run dev
       ▼
 src/routes/screens.js
       │
-      ├── reads all .js files from src/screens/ (except index.js)
+      ├── GET /screens         → returns the list of registered screens
       │
-      ├── for each file → registers GET /screens/<filename>
-      │
-      └── GET /screens → returns the auto-generated list
+      └── GET /screens/home    → returns the Home screen Node tree
 ```
 
-EN: No manual route registration needed. Adding a new `.js` file to `src/screens/` is enough — the endpoint is registered automatically on the next restart.
+EN: Each screen file inside `src/screens/` must be explicitly imported and registered as a route in `src/routes/screens.js`.
 
-PT: Nenhum registro manual de rota necessário. Basta adicionar um novo arquivo `.js` em `src/screens/` — o endpoint é registrado automaticamente na próxima inicialização.
+PT: Cada arquivo de tela em `src/screens/` deve ser explicitamente importado e registrado como rota em `src/routes/screens.js`.
 
 ---
 
@@ -95,7 +86,7 @@ PT: Nenhum registro manual de rota necessário. Basta adicionar um novo arquivo 
 
 ## How to Create a New Screen / Como Criar uma Nova Tela
 
-Follow these 2 steps to add a new screen. No other file needs to be changed.
+Follow these 3 steps to add a new screen.
 
 ### Step 1 — Create the screen file / Crie o arquivo da tela
 
@@ -117,37 +108,43 @@ Open the file and export a Node object:
  * PT: Árvore de Nodes para a tela Settings.
  */
 const settings = {
-  type: "column",
+  type: "text",
   props: {
-    paddingAll: 16,
+    text: "Settings",
+    style: {
+      padding: { start: 24, end: 24, top: 32, bottom: 0 },
+      color: "#1A202C",
+      fontSize: 22,
+      fontWeight: "semi-bold",
+    },
   },
-  children: [
-    {
-      type: "text",
-      props: {
-        text: "Settings",
-      },
-    },
-    {
-      type: "text",
-      props: {
-        text: "Manage your preferences here.",
-      },
-    },
-  ],
 };
 
 module.exports = settings;
 ```
 
+### Step 3 — Register the route / Registre a rota
+
+Open `src/routes/screens.js` and add the import and the two new routes:
+
+```js
+const settings = require("../screens/settings");
+
+// Add to GET /screens list:
+{ id: "settings", path: "/screens/settings" }
+
+// Add new route:
+router.get("/settings", (req, res) => {
+  res.json(settings);
+});
+```
+
 ### Done! / Pronto!
 
-After saving and restarting, the new endpoint will be available automatically:
+After saving and restarting, the new endpoint will be available:
 
 ```
-📋 Screens auto-discovered (2):
-   → http://localhost:3000/screens/home
-   → http://localhost:3000/screens/settings
+→ http://localhost:3000/screens/settings
 ```
 
 ---
@@ -160,22 +157,22 @@ PT: Cada tela exporta um objeto `Node`. A estrutura do Node deve corresponder ao
 
 ```js
 {
-  type: "column",       // Required — must match ComponentFactory.type() in Android
+  type: "text",         // Required — must match ComponentFactory.type() in Android
   props: {              // Optional — arbitrary properties read by the Factory
-    paddingAll: 16,
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
-    paddingStart: 16,
-    paddingEnd: 16,
-  },
-  children: [           // Optional — nested Nodes, rendered recursively
-    {
-      type: "text",
-      props: { text: "Hello" },
+    text: "Hello SDUI",
+    style: {
+      padding: {
+        start: 24,
+        end: 24,
+        top: 32,
+        bottom: 0,
+      },
+      color: "#1A202C",
+      fontSize: 22,
+      fontWeight: "semi-bold",
     },
-  ],
+  },
+  children: [],         // Optional — nested Nodes, rendered recursively
 }
 ```
 
@@ -185,8 +182,7 @@ PT: Cada tela exporta um objeto `Node`. A estrutura do Node deve corresponder ao
 
 | Type | Props | Description |
 |---|---|---|
-| `text` | `text: String` | Simple text label |
-| `column` | `paddingAll`, `paddingHorizontal`, `paddingVertical`, `paddingTop`, `paddingBottom`, `paddingStart`, `paddingEnd` | Vertical layout container |
+| `text` | `text: String`, `style.color: String`, `style.fontSize: Int`, `style.fontWeight: String`, `style.padding.start/end/top/bottom: Int` | Text label with optional styling |
 
 ---
 
