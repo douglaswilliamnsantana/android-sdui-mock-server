@@ -13,20 +13,14 @@ const home = {
       "type": "header",
       "components": [
         {
-          "type": "text",
+          "type": "app_bar",
           "props": {
-            "text": "Home",
-            "style": {
-              "padding": {
-                "start": 24,
-                "end": 24,
-                "top": 48,
-                "bottom": 16
-              },
-              "color": "#1A202C",
-              "fontSize": 24,
-              "fontWeight": "semi-bold"
-            }
+            "type": "center-aligned",
+            "title": "Home",
+            "leftIcon": "menu",
+            "leftAction": "/menu",
+            "rightIcon": "search",
+            "rightAction": "/search"
           }
         }
       ]
